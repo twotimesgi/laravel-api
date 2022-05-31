@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\HomeController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +16,27 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('guests.home');
+})->name('homepage');
+
+Auth::routes();
+
+Route::middleware('auth')
+    ->namespace('Admin')
+    ->name('admin.')
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/', 'HomeController@index')->name('home');
+        Route::post('/slugger', 'HomeController@slugger')->name('slugger');
+        Route::get('/posts/my-posts', 'PostController@myindex')->name('posts.myindex');
+        Route::resource('/posts', 'PostController');
+        Route::resource('/categories', 'CategoryController');
+        Route::get('account', 'UserController@edit')->name('account.edit');
+        Route::post('account', 'UserController@update')->name('account.update');
+        Route::delete('account', 'UserController@destroy')->name('account.destroy');
+    });
+
+
+Route::get("{any?}", function () {
+    return view('guests.home');
+})->where('any', '.*');
